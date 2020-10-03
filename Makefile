@@ -21,5 +21,5 @@ run_no_tests_titanic_pipeline: stop
 			-e PROJECT_DIR=/tdml-example \
 			-w /${PROJECT_DIR}/ \
 			${PROJECT_NAME} \
-			python3 -m no_tests.no_tests_titanic_ml_pipeline.py
+			python3 -m no_tests.no_tests_titanic_ml_pipeline
 

@@ -1,2 +1,0 @@
-def test_functional_when_runnning_existing_code_the_pipeline_should_produce_known_output():
-    pass
