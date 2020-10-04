@@ -14,3 +14,11 @@ def extract_title(input_df):
 
     df['Title'] = df['Title'].fillna(0)
     return df['Title']
+
+
+def extract_gender(input_df):
+    df = input_df[['Sex']].copy()
+    gender = df['Sex'].map(
+        {'female': 1, 'male': 0}
+    ).astype(int)
+    return gender

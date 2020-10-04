@@ -10,9 +10,15 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
-from with_tests.evaluator import get_model_accuracy, get_predictions
-from with_tests.feature_transformer import extract_title
-from with_tests.model_trainer import train_model, train_multi_models
+from with_tests.evaluator import get_predictions
+from with_tests.feature_transformer import extract_title, extract_gender
+from with_tests.model_trainer import train_multi_models
+
+
+def get_datasets_folder():
+    project_directory = os.environ.get("PROJECT_DIR", '..')
+    datasets_folder = f"{project_directory}/datasets/titanic/"
+    return datasets_folder
 
 
 def load_data(datasets_folder):
@@ -22,19 +28,13 @@ def load_data(datasets_folder):
     return df
 
 
-def get_datasets_folder():
-    project_directory = os.environ.get("PROJECT_DIR", '..')
-    datasets_folder = f"{project_directory}/datasets/titanic/"
-    return datasets_folder
-
-
 def run_pipeline():
     datasets_folder = get_datasets_folder()
     full_data_df = load_data(datasets_folder)
 
     full_data_df['Title'] = extract_title(full_data_df)
 
-    full_data_df['Sex'] = full_data_df['Sex'].map({'female': 1, 'male': 0}).astype(int)
+    full_data_df['Sex'] = extract_gender(full_data_df)
 
     guess_ages = np.zeros((2, 3))
 

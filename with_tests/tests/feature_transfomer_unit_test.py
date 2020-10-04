@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from with_tests.feature_transformer import extract_title
+from with_tests.feature_transformer import extract_title, extract_gender
 
 
 def test_extract_title_should_return_title_column():
@@ -35,3 +35,15 @@ def test_extract_title_should_return_title_column():
     expected_titles = np.array([x[1] for x in test_names])
 
     assert np.array_equal(title_column, expected_titles)
+
+
+def test_extract_gender_should_return_gender_column():
+    test_names = [
+        ("male", 0),
+        ("female", 1)
+    ]
+    gender_names = [x[0] for x in test_names]
+    df = pd.DataFrame({'Sex': gender_names})
+    gender_column = extract_gender(df)
+    expected_column = np.array([x[1] for x in test_names])
+    assert np.array_equal(gender_column, expected_column)
