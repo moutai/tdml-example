@@ -15,38 +15,35 @@ from with_tests.model_trainer import train_model, train_multi_models
 
 
 def run_pipeline():
-    project_directory = os.environ.get("PROJECT_DIR", '..')
-    datasets_folder = f"{project_directory}/datasets/titanic/"
-    train_df = pd.read_csv(datasets_folder + "0_train_data.csv")
-    test_df = pd.read_csv(datasets_folder + "1_known_data_to_score.csv")
-    df = pd.concat([train_df, test_df])
+    datasets_folder = get_datasets_folder()
+    full_data_df = load_data(datasets_folder)
 
-    df[['Pclass', 'Survived']].groupby(['Pclass'], as_index=False).mean().sort_values(by='Survived', ascending=False)
-    df[['Sex', 'Survived']].groupby(['Sex'], as_index=False).mean().sort_values(by='Survived', ascending=False)
-    df[['SibSp', 'Survived']].groupby(['SibSp'], as_index=False).mean().sort_values(by='Survived', ascending=False)
-    df[['Parch', 'Survived']].groupby(['Parch'], as_index=False).mean().sort_values(by='Survived', ascending=False)
-    df = df.drop(['Ticket', 'Cabin'], axis=1)
+    full_data_df[['Pclass', 'Survived']].groupby(['Pclass'], as_index=False).mean().sort_values(by='Survived', ascending=False)
+    full_data_df[['Sex', 'Survived']].groupby(['Sex'], as_index=False).mean().sort_values(by='Survived', ascending=False)
+    full_data_df[['SibSp', 'Survived']].groupby(['SibSp'], as_index=False).mean().sort_values(by='Survived', ascending=False)
+    full_data_df[['Parch', 'Survived']].groupby(['Parch'], as_index=False).mean().sort_values(by='Survived', ascending=False)
+    full_data_df = full_data_df.drop(['Ticket', 'Cabin'], axis=1)
 
-    df['Title'] = df.Name.str.extract(r' ([A-Za-z]+)\.', expand=False)
-    df['Title'] = df['Title'].replace(['Lady', 'Countess', 'Capt', 'Col',
+    full_data_df['Title'] = full_data_df.Name.str.extract(r' ([A-Za-z]+)\.', expand=False)
+    full_data_df['Title'] = full_data_df['Title'].replace(['Lady', 'Countess', 'Capt', 'Col',
                                        'Don', 'Dr', 'Major', 'Rev', 'Sir', 'Jonkheer', 'Dona'], 'Rare')
-    df['Title'] = df['Title'].replace('Mlle', 'Miss')
-    df['Title'] = df['Title'].replace('Ms', 'Miss')
-    df['Title'] = df['Title'].replace('Mme', 'Mrs')
-    df[['Title', 'Survived']].groupby(['Title'], as_index=False).mean()
+    full_data_df['Title'] = full_data_df['Title'].replace('Mlle', 'Miss')
+    full_data_df['Title'] = full_data_df['Title'].replace('Ms', 'Miss')
+    full_data_df['Title'] = full_data_df['Title'].replace('Mme', 'Mrs')
+    full_data_df[['Title', 'Survived']].groupby(['Title'], as_index=False).mean()
     title_mapping = {"Mr": 1, "Miss": 2, "Mrs": 3, "Master": 4, "Rare": 5}
-    df['Title'] = df['Title'].map(title_mapping)
-    df['Title'] = df['Title'].fillna(0)
+    full_data_df['Title'] = full_data_df['Title'].map(title_mapping)
+    full_data_df['Title'] = full_data_df['Title'].fillna(0)
 
-    df = df.drop(['Name'], axis=1)
+    full_data_df = full_data_df.drop(['Name'], axis=1)
 
-    df['Sex'] = df['Sex'].map({'female': 1, 'male': 0}).astype(int)
+    full_data_df['Sex'] = full_data_df['Sex'].map({'female': 1, 'male': 0}).astype(int)
 
     guess_ages = np.zeros((2, 3))
 
     for i in range(0, 2):
         for j in range(0, 3):
-            guess_df = df[(df['Sex'] == i) & (df['Pclass'] == j + 1)]['Age'].dropna()
+            guess_df = full_data_df[(full_data_df['Sex'] == i) & (full_data_df['Pclass'] == j + 1)]['Age'].dropna()
 
             # age_mean = guess_df.mean()
             # age_std = guess_df.std()
@@ -58,51 +55,51 @@ def run_pipeline():
             guess_ages[i, j] = int(age_guess / 0.5 + 0.5) * 0.5
     for i in range(0, 2):
         for j in range(0, 3):
-            df.loc[(df.Age.isnull()) & (df.Sex == i) & (df.Pclass == j + 1), \
+            full_data_df.loc[(full_data_df.Age.isnull()) & (full_data_df.Sex == i) & (full_data_df.Pclass == j + 1), \
                    'Age'] = guess_ages[i, j]
-    df['Age'] = df['Age'].astype(int)
-    df.head()
-    df['AgeBand'] = pd.cut(df['Age'], 5)
-    df[['AgeBand', 'Survived']].groupby(['AgeBand'], as_index=False).mean().sort_values(by='AgeBand', ascending=True)
-    df.loc[df['Age'] <= 16, 'Age'] = 0
-    df.loc[(df['Age'] > 16) & (df['Age'] <= 32), 'Age'] = 1
-    df.loc[(df['Age'] > 32) & (df['Age'] <= 48), 'Age'] = 2
-    df.loc[(df['Age'] > 48) & (df['Age'] <= 64), 'Age'] = 3
-    df.loc[df['Age'] > 64, 'Age'] = 4
+    full_data_df['Age'] = full_data_df['Age'].astype(int)
+    full_data_df.head()
+    full_data_df['AgeBand'] = pd.cut(full_data_df['Age'], 5)
+    full_data_df[['AgeBand', 'Survived']].groupby(['AgeBand'], as_index=False).mean().sort_values(by='AgeBand', ascending=True)
+    full_data_df.loc[full_data_df['Age'] <= 16, 'Age'] = 0
+    full_data_df.loc[(full_data_df['Age'] > 16) & (full_data_df['Age'] <= 32), 'Age'] = 1
+    full_data_df.loc[(full_data_df['Age'] > 32) & (full_data_df['Age'] <= 48), 'Age'] = 2
+    full_data_df.loc[(full_data_df['Age'] > 48) & (full_data_df['Age'] <= 64), 'Age'] = 3
+    full_data_df.loc[full_data_df['Age'] > 64, 'Age'] = 4
 
-    df = df.drop(['AgeBand'], axis=1)
+    full_data_df = full_data_df.drop(['AgeBand'], axis=1)
 
-    df['FamilySize'] = df['SibSp'] + df['Parch'] + 1
-    df[['FamilySize', 'Survived']].groupby(['FamilySize'], as_index=False).mean().sort_values(by='Survived',
+    full_data_df['FamilySize'] = full_data_df['SibSp'] + full_data_df['Parch'] + 1
+    full_data_df[['FamilySize', 'Survived']].groupby(['FamilySize'], as_index=False).mean().sort_values(by='Survived',
                                                                                               ascending=False)
-    df['IsAlone'] = 0
-    df.loc[df['FamilySize'] == 1, 'IsAlone'] = 1
-    df[['IsAlone', 'Survived']].groupby(['IsAlone'], as_index=False).mean()
-    df = df.drop(['Parch', 'SibSp', 'FamilySize'], axis=1)
+    full_data_df['IsAlone'] = 0
+    full_data_df.loc[full_data_df['FamilySize'] == 1, 'IsAlone'] = 1
+    full_data_df[['IsAlone', 'Survived']].groupby(['IsAlone'], as_index=False).mean()
+    full_data_df = full_data_df.drop(['Parch', 'SibSp', 'FamilySize'], axis=1)
 
-    df['Age*Class'] = df.Age * df.Pclass
-    df.loc[:, ['Age*Class', 'Age', 'Pclass']].head(10)
-    freq_port = df.Embarked.dropna().mode()[0]
+    full_data_df['Age*Class'] = full_data_df.Age * full_data_df.Pclass
+    full_data_df.loc[:, ['Age*Class', 'Age', 'Pclass']].head(10)
+    freq_port = full_data_df.Embarked.dropna().mode()[0]
 
-    df['Embarked'] = df['Embarked'].fillna(freq_port)
-    df[['Embarked', 'Survived']].groupby(['Embarked'], as_index=False).mean().sort_values(by='Survived',
+    full_data_df['Embarked'] = full_data_df['Embarked'].fillna(freq_port)
+    full_data_df[['Embarked', 'Survived']].groupby(['Embarked'], as_index=False).mean().sort_values(by='Survived',
                                                                                           ascending=False)
-    df['Embarked'] = df['Embarked'].map({'S': 0, 'C': 1, 'Q': 2}).astype(int)
+    full_data_df['Embarked'] = full_data_df['Embarked'].map({'S': 0, 'C': 1, 'Q': 2}).astype(int)
 
-    df['Fare'] = df['Fare'].fillna(df['Fare'].dropna().median())
+    full_data_df['Fare'] = full_data_df['Fare'].fillna(full_data_df['Fare'].dropna().median())
 
-    df['FareBand'] = pd.qcut(df['Fare'], 4)
-    df[['FareBand', 'Survived']].groupby(['FareBand'], as_index=False).mean().sort_values(by='FareBand', ascending=True)
-    df.loc[df['Fare'] <= 7.91, 'Fare'] = 0
-    df.loc[(df['Fare'] > 7.91) & (df['Fare'] <= 14.454), 'Fare'] = 1
-    df.loc[(df['Fare'] > 14.454) & (df['Fare'] <= 31), 'Fare'] = 2
-    df.loc[df['Fare'] > 31, 'Fare'] = 3
-    df['Fare'] = df['Fare'].astype(int)
-    df = df.drop(['FareBand'], axis=1)
+    full_data_df['FareBand'] = pd.qcut(full_data_df['Fare'], 4)
+    full_data_df[['FareBand', 'Survived']].groupby(['FareBand'], as_index=False).mean().sort_values(by='FareBand', ascending=True)
+    full_data_df.loc[full_data_df['Fare'] <= 7.91, 'Fare'] = 0
+    full_data_df.loc[(full_data_df['Fare'] > 7.91) & (full_data_df['Fare'] <= 14.454), 'Fare'] = 1
+    full_data_df.loc[(full_data_df['Fare'] > 14.454) & (full_data_df['Fare'] <= 31), 'Fare'] = 2
+    full_data_df.loc[full_data_df['Fare'] > 31, 'Fare'] = 3
+    full_data_df['Fare'] = full_data_df['Fare'].astype(int)
+    full_data_df = full_data_df.drop(['FareBand'], axis=1)
 
-    train_df = df[-df['Survived'].isna()]
+    train_df = full_data_df[-full_data_df['Survived'].isna()]
     train_df = train_df.drop(['PassengerId'], axis=1)
-    test_df = df[df['Survived'].isna()]
+    test_df = full_data_df[full_data_df['Survived'].isna()]
     test_df = test_df.drop('Survived', axis=1)
 
     X_train = train_df.drop("Survived", axis=1)
@@ -124,6 +121,19 @@ def run_pipeline():
                                                      test_df['PassengerId'])
 
     return passenger_survival_predictions, models_scores
+
+
+def load_data(datasets_folder):
+    train_df = pd.read_csv(datasets_folder + "0_train_data.csv")
+    test_df = pd.read_csv(datasets_folder + "1_known_data_to_score.csv")
+    df = pd.concat([train_df, test_df])
+    return df
+
+
+def get_datasets_folder():
+    project_directory = os.environ.get("PROJECT_DIR", '..')
+    datasets_folder = f"{project_directory}/datasets/titanic/"
+    return datasets_folder
 
 
 if __name__ == "__main__":
