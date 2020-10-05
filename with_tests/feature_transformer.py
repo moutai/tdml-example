@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def extract_title(input_df):
     df = input_df[['Name']].copy()
     df['Title'] = df['Name'].str.extract(r' ([A-Za-z]+)\.', expand=False)
@@ -22,3 +25,28 @@ def extract_gender(input_df):
         {'female': 1, 'male': 0}
     ).astype(int)
     return gender
+
+
+def generate_age_estimate(input_df):
+    df = input_df[['Gender', 'Pclass', 'Age']].copy()
+    guess_ages = np.zeros((2, 3))
+    for i in range(0, 2):
+        for j in range(0, 3):
+            guess_df = df[
+                (df['Gender'] == i) & (df['Pclass'] == j + 1)
+                ]['Age']
+
+            guess_df = guess_df.dropna()
+            age_guess = guess_df.median()
+
+            guess_ages[i, j] = int(age_guess / 0.5 + 0.5) * 0.5
+
+    for i in range(0, 2):
+        for j in range(0, 3):
+            df.loc[
+                (df['Age'].isnull())
+                & (df['Gender'] == i)
+                & (df['Pclass'] == j + 1),
+                'Age'] = guess_ages[i, j]
+    df['Age'] = df['Age'].astype(int)
+    return df['Age']
