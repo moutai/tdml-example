@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from with_tests.feature_transformer import extract_title, extract_gender, generate_age_estimate
+from with_tests.testable_titanic_ml_pipeline import convert_age_guess_to_age_category
 
 
 def test_extract_title_should_return_title_column():
@@ -59,3 +60,15 @@ def test_extract_generate_age_estimate_should_return_age_estimate_column():
     actual_df = generate_age_estimate(input_df)
     expected = np.array([10, 20, 30, 40, 50, 60, 10, 20, 30, 40, 50, 60])
     assert np.array_equal(actual_df, expected)
+
+
+def test_convert_age_guess_to_age_category():
+    input_df = pd.DataFrame(
+        {'AgeGuess': [16, 32, 48, 64, 65]}
+    )
+    expected_df = pd.DataFrame(
+        {'AgeCategory': [0, 1, 2, 3, 4]}
+    )
+
+    actual_df = convert_age_guess_to_age_category(input_df)
+    assert expected_df.equals(actual_df)
