@@ -79,3 +79,12 @@ def convert_age_guess_to_age_category(input_df):
 
 def calculate_age_class_combo(full_data_df):
     return full_data_df['AgeGuess'] * full_data_df['Pclass']
+
+
+def extract_embarked_port_category(input_df):
+    df = input_df[['Embarked']].copy()
+    freq_port = df['Embarked'].dropna().mode()[0]
+    df['Embarked'] = df['Embarked'].fillna(freq_port)
+    df['EmbarkedPortCategory'] = df['Embarked'].map({'S': 0, 'C': 1, 'Q': 2})
+    df['EmbarkedPortCategory'] = df['EmbarkedPortCategory'].astype(int)
+    return df[['EmbarkedPortCategory']]

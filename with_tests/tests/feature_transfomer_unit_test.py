@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from with_tests.feature_transformer import extract_title, extract_gender, generate_age_estimate
+from with_tests.feature_transformer import extract_title, extract_gender, generate_age_estimate, \
+    extract_embarked_port_category
 from with_tests.testable_titanic_ml_pipeline import convert_age_guess_to_age_category, extract_is_alone_indicator, \
     extract_family_size, calculate_age_class_combo
 
@@ -106,4 +107,14 @@ def test_extract_age_class_combo():
     )
     actual_df = calculate_age_class_combo(input_df)
     np.array_equal(input_df[['ExpectedCombo']].values,
+                   actual_df.values)
+
+
+def test_extract_embarked_port_category():
+    input_df = pd.DataFrame(
+        {'Embarked': ['S', 'C', 'Q', 'Q', None],
+         'Expected': [0, 1, 2, 2, 2]}
+    )
+    actual_df = extract_embarked_port_category(input_df)
+    np.array_equal(input_df[['Expected']].values,
                    actual_df.values)
