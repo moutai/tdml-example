@@ -10,7 +10,8 @@ from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
 from with_tests.evaluator import get_predictions
-from with_tests.feature_transformer import extract_title, extract_gender, generate_age_estimate
+from with_tests.feature_transformer import extract_title, extract_gender, generate_age_estimate, \
+    convert_age_guess_to_age_category, extract_family_size, extract_is_alone_indicator
 from with_tests.model_trainer import train_multi_models
 
 
@@ -39,15 +40,13 @@ def run_pipeline():
 
     full_data_df['AgeCategory'] = convert_age_guess_to_age_category(full_data_df)
 
-    full_data_df['FamilySize'] = full_data_df['SibSp'] + full_data_df['Parch'] + 1
+    full_data_df['FamilySize'] = extract_family_size(full_data_df)
 
-    full_data_df['IsAlone'] = 0
-    full_data_df.loc[full_data_df['FamilySize'] == 1, 'IsAlone'] = 1
+    full_data_df['IsAlone'] = extract_is_alone_indicator(full_data_df)
 
     full_data_df['Age*Class'] = full_data_df['AgeGuess'] * full_data_df['Pclass']
-    full_data_df.loc[:, ['Age*Class', 'AgeGuess', 'Pclass']].head(10)
-    freq_port = full_data_df.Embarked.dropna().mode()[0]
 
+    freq_port = full_data_df['Embarked'].dropna().mode()[0]
     full_data_df['Embarked'] = full_data_df['Embarked'].fillna(freq_port)
     full_data_df['Embarked'] = full_data_df['Embarked'].map({'S': 0, 'C': 1, 'Q': 2}).astype(int)
 
@@ -92,17 +91,6 @@ def run_pipeline():
                                                      test_df['PassengerId'])
 
     return passenger_survival_predictions, models_scores
-
-
-def convert_age_guess_to_age_category(input_df):
-    df = input_df[['AgeGuess']].copy()
-    df['AgeCategory'] = 0
-    df.loc[df['AgeGuess'] <= 16, 'AgeCategory'] = 0
-    df.loc[(df['AgeGuess'] > 16) & (df['AgeGuess'] <= 32), 'AgeCategory'] = 1
-    df.loc[(df['AgeGuess'] > 32) & (df['AgeGuess'] <= 48), 'AgeCategory'] = 2
-    df.loc[(df['AgeGuess'] > 48) & (df['AgeGuess'] <= 64), 'AgeCategory'] = 3
-    df.loc[df['AgeGuess'] > 64, 'AgeCategory'] = 4
-    return df[['AgeCategory']]
 
 
 if __name__ == "__main__":
