@@ -75,3 +75,7 @@ def convert_age_guess_to_age_category(input_df):
     df.loc[(df['AgeGuess'] > 48) & (df['AgeGuess'] <= 64), 'AgeCategory'] = 3
     df.loc[df['AgeGuess'] > 64, 'AgeCategory'] = 4
     return df[['AgeCategory']]
+
+
+def calculate_age_class_combo(full_data_df):
+    return full_data_df['AgeGuess'] * full_data_df['Pclass']

@@ -3,7 +3,7 @@ import pandas as pd
 
 from with_tests.feature_transformer import extract_title, extract_gender, generate_age_estimate
 from with_tests.testable_titanic_ml_pipeline import convert_age_guess_to_age_category, extract_is_alone_indicator, \
-    extract_family_size
+    extract_family_size, calculate_age_class_combo
 
 
 def test_extract_title_should_return_title_column():
@@ -95,4 +95,15 @@ def test_extract_is_alone_indicator():
 
     actual_df = extract_is_alone_indicator(input_df)
     np.array_equal(input_df[['ExpectedIsAlone']].values,
+                   actual_df.values)
+
+
+def test_extract_age_class_combo():
+    input_df = pd.DataFrame(
+        {'AgeGuess': [1, 2, 3, 4],
+         'Pclass': [3, 4, 3, 1],
+         'ExpectedCombo': [3, 8, 9, 4]}
+    )
+    actual_df = calculate_age_class_combo(input_df)
+    np.array_equal(input_df[['ExpectedCombo']].values,
                    actual_df.values)

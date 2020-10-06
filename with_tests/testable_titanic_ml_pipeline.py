@@ -11,7 +11,7 @@ from sklearn.tree import DecisionTreeClassifier
 
 from with_tests.evaluator import get_predictions
 from with_tests.feature_transformer import extract_title, extract_gender, generate_age_estimate, \
-    convert_age_guess_to_age_category, extract_family_size, extract_is_alone_indicator
+    convert_age_guess_to_age_category, extract_family_size, extract_is_alone_indicator, calculate_age_class_combo
 from with_tests.model_trainer import train_multi_models
 
 
@@ -44,7 +44,7 @@ def run_pipeline():
 
     full_data_df['IsAlone'] = extract_is_alone_indicator(full_data_df)
 
-    full_data_df['Age*Class'] = full_data_df['AgeGuess'] * full_data_df['Pclass']
+    full_data_df['Age*Class'] = calculate_age_class_combo(full_data_df)
 
     freq_port = full_data_df['Embarked'].dropna().mode()[0]
     full_data_df['Embarked'] = full_data_df['Embarked'].fillna(freq_port)
