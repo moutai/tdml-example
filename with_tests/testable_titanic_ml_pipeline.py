@@ -1,21 +1,14 @@
 import os
-import pandas as pd
-import numpy as np
-import random as rnd
 
-from sklearn.svm import SVC
-from sklearn.linear_model import LogisticRegression
+import numpy as np
+import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.naive_bayes import GaussianNB
 from sklearn.linear_model import Perceptron
 from sklearn.linear_model import SGDClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
-
-import numpy as np
-import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
-from sklearn import metrics
 
 
 def run_pipeline():
@@ -24,20 +17,14 @@ def run_pipeline():
     train_df = pd.read_csv(datasets_folder + "0_train_data.csv")
     test_df = pd.read_csv(datasets_folder + "1_known_data_to_score.csv")
     df = pd.concat([train_df, test_df])
-    print(df.columns.values)
-    df.head()
-    df.tail()
-    df.info()
-    df.describe()
-    df.describe(include=['O'])
+
     df[['Pclass', 'Survived']].groupby(['Pclass'], as_index=False).mean().sort_values(by='Survived', ascending=False)
     df[['Sex', 'Survived']].groupby(['Sex'], as_index=False).mean().sort_values(by='Survived', ascending=False)
     df[['SibSp', 'Survived']].groupby(['SibSp'], as_index=False).mean().sort_values(by='Survived', ascending=False)
     df[['Parch', 'Survived']].groupby(['Parch'], as_index=False).mean().sort_values(by='Survived', ascending=False)
     df = df.drop(['Ticket', 'Cabin'], axis=1)
-    print(df.shape)
-    df['Title'] = df.Name.str.extract(' ([A-Za-z]+)\.', expand=False)
-    pd.crosstab(df['Title'], df['Sex'])
+
+    df['Title'] = df.Name.str.extract(r' ([A-Za-z]+)\.', expand=False)
     df['Title'] = df['Title'].replace(['Lady', 'Countess', 'Capt', 'Col',
                                        'Don', 'Dr', 'Major', 'Rev', 'Sir', 'Jonkheer', 'Dona'], 'Rare')
     df['Title'] = df['Title'].replace('Mlle', 'Miss')
@@ -47,14 +34,13 @@ def run_pipeline():
     title_mapping = {"Mr": 1, "Miss": 2, "Mrs": 3, "Master": 4, "Rare": 5}
     df['Title'] = df['Title'].map(title_mapping)
     df['Title'] = df['Title'].fillna(0)
-    df.head()
-    df.info()
+
     df = df.drop(['Name'], axis=1)
-    df.shape
+
     df['Sex'] = df['Sex'].map({'female': 1, 'male': 0}).astype(int)
-    df.head()
+
     guess_ages = np.zeros((2, 3))
-    guess_ages
+
     for i in range(0, 2):
         for j in range(0, 3):
             guess_df = df[(df['Sex'] == i) & (df['Pclass'] == j + 1)]['Age'].dropna()
@@ -79,10 +65,10 @@ def run_pipeline():
     df.loc[(df['Age'] > 16) & (df['Age'] <= 32), 'Age'] = 1
     df.loc[(df['Age'] > 32) & (df['Age'] <= 48), 'Age'] = 2
     df.loc[(df['Age'] > 48) & (df['Age'] <= 64), 'Age'] = 3
-    df.loc[df['Age'] > 64, 'Age']
-    df.head()
+    df.loc[df['Age'] > 64, 'Age'] = 4
+
     df = df.drop(['AgeBand'], axis=1)
-    df.head()
+
     df['FamilySize'] = df['SibSp'] + df['Parch'] + 1
     df[['FamilySize', 'Survived']].groupby(['FamilySize'], as_index=False).mean().sort_values(by='Survived',
                                                                                               ascending=False)
@@ -90,18 +76,18 @@ def run_pipeline():
     df.loc[df['FamilySize'] == 1, 'IsAlone'] = 1
     df[['IsAlone', 'Survived']].groupby(['IsAlone'], as_index=False).mean()
     df = df.drop(['Parch', 'SibSp', 'FamilySize'], axis=1)
-    df.head()
+
     df['Age*Class'] = df.Age * df.Pclass
     df.loc[:, ['Age*Class', 'Age', 'Pclass']].head(10)
     freq_port = df.Embarked.dropna().mode()[0]
-    freq_port
+
     df['Embarked'] = df['Embarked'].fillna(freq_port)
     df[['Embarked', 'Survived']].groupby(['Embarked'], as_index=False).mean().sort_values(by='Survived',
                                                                                           ascending=False)
     df['Embarked'] = df['Embarked'].map({'S': 0, 'C': 1, 'Q': 2}).astype(int)
-    df.head()
+
     df['Fare'] = df['Fare'].fillna(df['Fare'].dropna().median())
-    df.head()
+
     df['FareBand'] = pd.qcut(df['Fare'], 4)
     df[['FareBand', 'Survived']].groupby(['FareBand'], as_index=False).mean().sort_values(by='FareBand', ascending=True)
     df.loc[df['Fare'] <= 7.91, 'Fare'] = 0
@@ -110,54 +96,55 @@ def run_pipeline():
     df.loc[df['Fare'] > 31, 'Fare'] = 3
     df['Fare'] = df['Fare'].astype(int)
     df = df.drop(['FareBand'], axis=1)
-    df.head(10)
-    test_df.head(10)
+
     train_df = df[-df['Survived'].isna()]
     train_df = train_df.drop(['PassengerId'], axis=1)
     test_df = df[df['Survived'].isna()]
     test_df = test_df.drop('Survived', axis=1)
-    print(train_df.shape)
-    print(test_df.shape)
+
     X_train = train_df.drop("Survived", axis=1)
     Y_train = train_df["Survived"]
     X_test = test_df.drop("PassengerId", axis=1).copy()
-    X_train.shape, Y_train.shape, X_test.shape
+
+
     svc = SVC()
     svc.fit(X_train, Y_train)
     Y_pred = svc.predict(X_test)
     acc_svc = round(svc.score(X_train, Y_train) * 100, 2)
-    acc_svc
+
+
     knn = KNeighborsClassifier(n_neighbors=3)
     knn.fit(X_train, Y_train)
     Y_pred = knn.predict(X_test)
     acc_knn = round(knn.score(X_train, Y_train) * 100, 2)
-    acc_knn
+
+
     gaussian = GaussianNB()
     gaussian.fit(X_train, Y_train)
     Y_pred = gaussian.predict(X_test)
     acc_gaussian = round(gaussian.score(X_train, Y_train) * 100, 2)
-    acc_gaussian
+
     perceptron = Perceptron()
     perceptron.fit(X_train, Y_train)
     Y_pred = perceptron.predict(X_test)
     acc_perceptron = round(perceptron.score(X_train, Y_train) * 100, 2)
-    acc_perceptron
+
     sgd = SGDClassifier()
     sgd.fit(X_train, Y_train)
     Y_pred = sgd.predict(X_test)
     acc_sgd = round(sgd.score(X_train, Y_train) * 100, 2)
-    acc_sgd
+
     decision_tree = DecisionTreeClassifier()
     decision_tree.fit(X_train, Y_train)
     Y_pred = decision_tree.predict(X_test)
     acc_decision_tree = round(decision_tree.score(X_train, Y_train) * 100, 2)
-    acc_decision_tree
+
     random_forest = RandomForestClassifier(n_estimators=100)
     random_forest.fit(X_train, Y_train)
     Y_pred = random_forest.predict(X_test)
     random_forest.score(X_train, Y_train)
     acc_random_forest = round(random_forest.score(X_train, Y_train) * 100, 2)
-    acc_random_forest
+
     models = pd.DataFrame({
         'Model': ['Support Vector Machines', 'KNN',
                   'Random Forest', 'Naive Bayes', 'Perceptron',
@@ -167,7 +154,7 @@ def run_pipeline():
                   acc_random_forest, acc_gaussian, acc_perceptron,
                   acc_sgd, acc_decision_tree]})
     models.sort_values(by='Score', ascending=False)
-    print(models)
+
     output = pd.DataFrame({
         "PassengerId": test_df["PassengerId"],
         "Survived": Y_pred
