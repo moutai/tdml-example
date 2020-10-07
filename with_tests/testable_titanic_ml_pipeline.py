@@ -37,8 +37,6 @@ def run_pipeline():
 
     full_data_df['AgeGuess'] = generate_age_estimate(full_data_df)
 
-    full_data_df['AgeBand'] = pd.cut(full_data_df['AgeGuess'], 5)
-
     full_data_df.loc[full_data_df['AgeGuess'] <= 16, 'AgeGuess'] = 0
     full_data_df.loc[(full_data_df['AgeGuess'] > 16) & (full_data_df['AgeGuess'] <= 32), 'AgeGuess'] = 1
     full_data_df.loc[(full_data_df['AgeGuess'] > 32) & (full_data_df['AgeGuess'] <= 48), 'AgeGuess'] = 2
@@ -72,7 +70,6 @@ def run_pipeline():
                                       'Age',
                                       'Ticket',
                                       'Cabin',
-                                      'AgeBand',
                                       'FareBand'], axis=1)
 
     train_df = full_data_df[-full_data_df['Survived'].isna()]
