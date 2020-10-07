@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from with_tests.feature_transformer import extract_title, extract_gender, generate_age_estimate, \
-    extract_embarked_port_category
+    extract_embarked_port_category, extract_fare_category
 from with_tests.testable_titanic_ml_pipeline import convert_age_guess_to_age_category, extract_is_alone_indicator, \
     extract_family_size, calculate_age_class_combo
 
@@ -116,5 +116,15 @@ def test_extract_embarked_port_category():
          'Expected': [0, 1, 2, 2, 2]}
     )
     actual_df = extract_embarked_port_category(input_df)
+    np.array_equal(input_df[['Expected']].values,
+                   actual_df.values)
+
+
+def test_extract_fare_category():
+    input_df = pd.DataFrame(
+        {'Fare': [7, 10, 20, 40, None],
+         'Expected': [0, 1, 2, 3, 2]}
+    )
+    actual_df = extract_fare_category(input_df)
     np.array_equal(input_df[['Expected']].values,
                    actual_df.values)
