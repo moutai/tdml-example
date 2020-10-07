@@ -9,13 +9,16 @@ def train_model(Model, X_train, Y_train, **kwargs):
     return model
 
 
-def train_multi_models(X_train, Y_train, models_list):
+def train_multi_models(input_X_train, input_y_train,
+                       input_X_validation, input_y_validation,
+                       models_list):
     trained_models = {}
+
     models_scores = {'Model': [],
                      'Score': []}
     for model, name, params in models_list:
-        trained_model = train_model(model, X_train, Y_train)
-        accuracy_score = get_model_accuracy(trained_model, X_train, Y_train)
+        trained_model = train_model(model, input_X_train, input_y_train)
+        accuracy_score = get_model_accuracy(trained_model, input_X_validation, input_y_validation)
         models_scores['Model'].append(name)
         models_scores['Score'].append(accuracy_score)
         trained_models[name] = trained_model

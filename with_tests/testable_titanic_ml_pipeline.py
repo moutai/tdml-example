@@ -4,6 +4,7 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import Perceptron
 from sklearn.linear_model import SGDClassifier
+from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
@@ -51,7 +52,7 @@ def run_pipeline():
 
     full_data_df['FareCategory'] = extract_fare_category(full_data_df)
 
-    X_train, Y_train, X_test, train_columns, test_columns, test_df = get_model_ready_train_and_test_sets(full_data_df)
+    X_full, Y_full, X_test, train_columns, test_columns, test_df = get_model_ready_train_and_test_sets(full_data_df)
 
     models_list = [(SVC, 'Support Vector Machines', None),
                    (KNeighborsClassifier, 'KNN', {"n_neighbors": 3}),
@@ -61,7 +62,14 @@ def run_pipeline():
                    (DecisionTreeClassifier, 'Decision Tree', None),
                    (RandomForestClassifier, 'Random Forest', {"n_estimators": 100})]
 
-    models_scores, trained_models = train_multi_models(X_train, Y_train, models_list)
+    X_train, X_validation, y_train, y_validation = train_test_split(X_full,
+                                                                    Y_full,
+                                                                    test_size=0.2,
+                                                                    random_state=0)
+
+    models_scores, trained_models = train_multi_models(X_train, y_train,
+                                                       X_validation, y_validation,
+                                                       models_list)
 
     passenger_survival_predictions = get_predictions(trained_models['Random Forest'],
                                                      X_test,
