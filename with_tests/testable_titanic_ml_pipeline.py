@@ -51,33 +51,7 @@ def run_pipeline():
 
     full_data_df['FareCategory'] = extract_fare_category(full_data_df)
 
-
-    train_df = full_data_df[-full_data_df['Survived'].isna()]
-
-    train_df = train_df[[
-        'Survived',
-        'Title',
-        'Pclass',
-        'Gender',
-        'AgeGuess',
-        # 'AgeCategory',
-        'IsAlone',
-        # 'FamilySize'
-        'Age*Class',
-        'EmbarkedPortCategory',
-        'FareCategory',
-    ]]
-
-    train_columns = train_df.columns
-
-    X_train = train_df.drop('Survived', axis=1).copy()
-    Y_train = train_df["Survived"]
-
-    test_df = full_data_df[full_data_df['Survived'].isna()]
-    test_df = test_df[list(train_df.columns.values)+["PassengerId"]]
-    test_df = test_df.drop('Survived', axis=1)
-    test_columns = test_df.columns
-    X_test = test_df.drop("PassengerId", axis=1).copy()
+    X_train, Y_train, X_test, train_columns, test_columns, test_df = get_model_ready_train_and_test_sets(full_data_df)
 
     models_list = [(SVC, 'Support Vector Machines', None),
                    (KNeighborsClassifier, 'KNN', {"n_neighbors": 3}),
@@ -94,6 +68,35 @@ def run_pipeline():
                                                      test_df['PassengerId'])
 
     return passenger_survival_predictions, models_scores, train_columns, test_columns
+
+
+def get_model_ready_train_and_test_sets(input_df):
+    df = input_df.copy()
+    train_df = df[-df['Survived'].isna()]
+    train_df = train_df[[
+        'Survived',
+        'Title',
+        'Pclass',
+        'Gender',
+        'AgeGuess',
+        # 'AgeCategory',
+        'IsAlone',
+        # 'FamilySize'
+        'Age*Class',
+        'EmbarkedPortCategory',
+        'FareCategory',
+    ]]
+    train_columns = train_df.columns
+    X_train = train_df.drop('Survived', axis=1).copy()
+    Y_train = train_df["Survived"]
+
+    test_df = input_df[input_df['Survived'].isna()]
+    test_df = test_df[list(train_df.columns.values) + ["PassengerId"]]
+    test_df = test_df.drop('Survived', axis=1)
+    test_columns = test_df.columns
+    X_test = test_df.drop("PassengerId", axis=1).copy()
+
+    return X_train, Y_train, X_test, train_columns, test_columns, test_df
 
 
 if __name__ == "__main__":
