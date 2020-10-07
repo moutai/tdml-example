@@ -51,3 +51,27 @@ def generate_age_estimate(input_df):
                 'Age'] = guess_ages[i, j]
     df['Age'] = df['Age'].astype(int)
     return df['Age']
+
+
+def extract_family_size(input_df):
+    df = input_df[['SibSp', 'Parch']].copy()
+    df['FamilySize'] = df['SibSp'] + df['Parch'] + 1
+    return df[['FamilySize']]
+
+
+def extract_is_alone_indicator(input_df):
+    df = input_df[['FamilySize']].copy()
+    df['IsAlone'] = 0
+    df.loc[df['FamilySize'] == 1, 'IsAlone'] = 1
+    return df[['IsAlone']]
+
+
+def convert_age_guess_to_age_category(input_df):
+    df = input_df[['AgeGuess']].copy()
+    df['AgeCategory'] = 0
+    df.loc[df['AgeGuess'] <= 16, 'AgeCategory'] = 0
+    df.loc[(df['AgeGuess'] > 16) & (df['AgeGuess'] <= 32), 'AgeCategory'] = 1
+    df.loc[(df['AgeGuess'] > 32) & (df['AgeGuess'] <= 48), 'AgeCategory'] = 2
+    df.loc[(df['AgeGuess'] > 48) & (df['AgeGuess'] <= 64), 'AgeCategory'] = 3
+    df.loc[df['AgeGuess'] > 64, 'AgeCategory'] = 4
+    return df[['AgeCategory']]

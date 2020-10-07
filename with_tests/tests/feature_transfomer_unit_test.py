@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 
 from with_tests.feature_transformer import extract_title, extract_gender, generate_age_estimate
-from with_tests.testable_titanic_ml_pipeline import convert_age_guess_to_age_category
+from with_tests.testable_titanic_ml_pipeline import convert_age_guess_to_age_category, extract_is_alone_indicator, \
+    extract_family_size
 
 
 def test_extract_title_should_return_title_column():
@@ -72,3 +73,26 @@ def test_convert_age_guess_to_age_category():
 
     actual_df = convert_age_guess_to_age_category(input_df)
     assert expected_df.equals(actual_df)
+
+
+def test_extract_family_size():
+    input_df = pd.DataFrame(
+        {'SibSp': [0, 1, 0, 1],
+         'Parch': [0, 0, 1, 1],
+         'ExpectedFamilySize': [1, 2, 2, 3]}
+    )
+
+    actual_df = extract_family_size(input_df)
+    np.array_equal(input_df[['ExpectedFamilySize']].values,
+                   actual_df.values)
+
+
+def test_extract_is_alone_indicator():
+    input_df = pd.DataFrame(
+        {'FamilySize': [1, 2, 3, 4],
+         'ExpectedIsAlone': [1, 0, 0, 0]}
+    )
+
+    actual_df = extract_is_alone_indicator(input_df)
+    np.array_equal(input_df[['ExpectedIsAlone']].values,
+                   actual_df.values)
