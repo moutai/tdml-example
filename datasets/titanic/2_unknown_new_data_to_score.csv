@@ -1,18 +1,18 @@
 PassengerId,Pclass,Name,Sex,Age,SibSp,Parch,Ticket,Fare,Cabin,Embarked
 1190,1,"Loring, Mr. Joseph Holland",male,30,0,0,113801,45.5,,S
-1191,3,"Johansson, Mr. Nils",male,29,0,0,347467,7.8542,,S
-1192,3,"Olsson, Mr. Oscar Wilhelm",male,32,0,0,347079,7.775,,S
+1191,3,"Johansson, Mr. Nils",unknown,29,0,0,347467,7.8542,,S
+1192,3,"Olsson, Mr. Oscar Wilhelm",male,A,-1,0,347079,7.775,,S
 1193,2,"Malachard, Mr. Noel",male,,0,0,237735,15.0458,D,C
 1194,2,"Phillips, Mr. Escott Robert",male,43,0,1,S.O./P.P. 2,21,,S
-1195,3,"Pokrnic, Mr. Tome",male,24,0,0,315092,8.6625,,S
+1195,3,"Pokrnic, Mr. Tome",unknown,24,0,0,315092,8.6625,,S
 1196,3,"McCarthy, Miss. Catherine Katie""""",female,,0,0,383123,7.75,,Q
-1197,1,"Crosby, Mrs. Edward Gifford (Catherine Elizabeth Halstead)",female,64,1,1,112901,26.55,B26,S
+1197,1,"Crosby, Mrs. Edward Gifford (Catherine Elizabeth Halstead)",female,64,1,1,112901,asdf,B26,T
 1198,1,"Allison, Mr. Hudson Joshua Creighton",male,30,1,2,113781,151.55,C22 C26,S
 1199,3,"Aks, Master. Philip Frank",male,0.83,0,1,392091,9.35,,S
 1200,1,"Hays, Mr. Charles Melville",male,55,1,1,12749,93.5,B69,S
 1201,3,"Hansen, Mrs. Claus Peter (Jennie L Howard)",female,45,1,0,350026,14.1083,,S
 1202,3,"Cacic, Mr. Jego Grga",male,18,0,0,315091,8.6625,,S
-1203,3,"Vartanian, Mr. David",male,22,0,0,2658,7.225,,C
+1203,3,"Vartanian, Mr. David",unk,22,0,0,2658,7.225,,C
 1204,3,"Sadowitz, Mr. Harry",male,,0,0,LP 1588,7.575,,S
 1205,3,"Carr, Miss. Jeannie",female,37,0,0,368364,7.75,,Q
 1206,1,"White, Mrs. John Stuart (Ella Holmes)",female,55,0,0,PC 17760,135.6333,C32,C
@@ -28,9 +28,9 @@ PassengerId,Pclass,Name,Sex,Age,SibSp,Parch,Ticket,Fare,Cabin,Embarked
 1216,1,"Kreuchen, Miss. Emilie",female,39,0,0,24160,211.3375,,S
 1217,3,"Assam, Mr. Ali",male,23,0,0,SOTON/O.Q. 3101309,7.05,,S
 1218,2,"Becker, Miss. Ruth Elizabeth",female,12,2,1,230136,39,F4,S
-1219,1,"Rosenshine, Mr. George (Mr George Thorne"")""",male,46,0,0,PC 17585,79.2,,C
+1219,1,"Rosenshine, Mr. George (Mr George Thorne"")""",male,46,0,0,PC 17585,79.2,,H
 1220,2,"Clarke, Mr. Charles Valentine",male,29,1,0,2003,26,,S
-1221,2,"Enander, Mr. Ingvar",male,21,0,0,236854,13,,S
+1221,2,"Enander, Mr. Ingvar",unk,21,0,0,236854,13,,S
 1222,2,"Davies, Mrs. John Morgan (Elizabeth Agnes Mary White) ",female,48,0,2,C.A. 33112,36.75,,S
 1223,1,"Dulles, Mr. William Crothers",male,39,0,0,PC 17580,29.7,A18,C
 1224,3,"Thomas, Mr. Tannous",male,,0,0,2684,7.225,,C
