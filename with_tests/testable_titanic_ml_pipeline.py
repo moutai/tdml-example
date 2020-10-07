@@ -11,7 +11,8 @@ from sklearn.tree import DecisionTreeClassifier
 
 from with_tests.evaluator import get_predictions
 from with_tests.feature_transformer import extract_title, extract_gender, generate_age_estimate, \
-    convert_age_guess_to_age_category, extract_family_size, extract_is_alone_indicator, calculate_age_class_combo
+    convert_age_guess_to_age_category, extract_family_size, extract_is_alone_indicator, calculate_age_class_combo, \
+    extract_embarked_port_category
 from with_tests.model_trainer import train_multi_models
 
 
@@ -46,9 +47,7 @@ def run_pipeline():
 
     full_data_df['Age*Class'] = calculate_age_class_combo(full_data_df)
 
-    freq_port = full_data_df['Embarked'].dropna().mode()[0]
-    full_data_df['Embarked'] = full_data_df['Embarked'].fillna(freq_port)
-    full_data_df['Embarked'] = full_data_df['Embarked'].map({'S': 0, 'C': 1, 'Q': 2}).astype(int)
+    full_data_df['EmbarkedPortCategory'] = extract_embarked_port_category(full_data_df)
 
     full_data_df['Fare'] = full_data_df['Fare'].fillna(full_data_df['Fare'].dropna().median())
 
@@ -65,7 +64,9 @@ def run_pipeline():
                                       'Age',
                                       'Ticket',
                                       'Cabin',
-                                      'FareBand'], axis=1)
+                                      'FareBand',
+                                      'Embarked'],
+                                     axis=1)
 
     train_df = full_data_df[-full_data_df['Survived'].isna()]
     train_df = train_df.drop(['PassengerId'], axis=1)
