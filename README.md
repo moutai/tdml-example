@@ -1,5 +1,6 @@
 # TDML Example
 #### Test Driven Machine Learning Example
+Companion exercise to the "Clean Machine Learning Code" book: http://cleanmachinelearningcode.com/
 
 #### Setup 
 1) Requirements:
@@ -32,6 +33,6 @@
 
 
 
-Companion exercise to the "Clean Machine Learning Code" book: http://cleanmachinelearningcode.com/       
+       
 
 
