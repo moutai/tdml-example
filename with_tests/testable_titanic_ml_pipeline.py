@@ -11,6 +11,7 @@ from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
 from with_tests.evaluator import get_model_accuracy, get_predictions
+from with_tests.feature_transformer import extract_title
 from with_tests.model_trainer import train_model, train_multi_models
 
 
@@ -18,23 +19,9 @@ def run_pipeline():
     datasets_folder = get_datasets_folder()
     full_data_df = load_data(datasets_folder)
 
-    full_data_df[['Pclass', 'Survived']].groupby(['Pclass'], as_index=False).mean().sort_values(by='Survived', ascending=False)
-    full_data_df[['Sex', 'Survived']].groupby(['Sex'], as_index=False).mean().sort_values(by='Survived', ascending=False)
-    full_data_df[['SibSp', 'Survived']].groupby(['SibSp'], as_index=False).mean().sort_values(by='Survived', ascending=False)
-    full_data_df[['Parch', 'Survived']].groupby(['Parch'], as_index=False).mean().sort_values(by='Survived', ascending=False)
+    full_data_df['Title'] = extract_title(full_data_df)
+
     full_data_df = full_data_df.drop(['Ticket', 'Cabin'], axis=1)
-
-    full_data_df['Title'] = full_data_df.Name.str.extract(r' ([A-Za-z]+)\.', expand=False)
-    full_data_df['Title'] = full_data_df['Title'].replace(['Lady', 'Countess', 'Capt', 'Col',
-                                       'Don', 'Dr', 'Major', 'Rev', 'Sir', 'Jonkheer', 'Dona'], 'Rare')
-    full_data_df['Title'] = full_data_df['Title'].replace('Mlle', 'Miss')
-    full_data_df['Title'] = full_data_df['Title'].replace('Ms', 'Miss')
-    full_data_df['Title'] = full_data_df['Title'].replace('Mme', 'Mrs')
-    full_data_df[['Title', 'Survived']].groupby(['Title'], as_index=False).mean()
-    title_mapping = {"Mr": 1, "Miss": 2, "Mrs": 3, "Master": 4, "Rare": 5}
-    full_data_df['Title'] = full_data_df['Title'].map(title_mapping)
-    full_data_df['Title'] = full_data_df['Title'].fillna(0)
-
     full_data_df = full_data_df.drop(['Name'], axis=1)
 
     full_data_df['Sex'] = full_data_df['Sex'].map({'female': 1, 'male': 0}).astype(int)
