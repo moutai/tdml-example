@@ -1,6 +1,5 @@
 import os
 
-import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import Perceptron
@@ -11,7 +10,7 @@ from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
 from with_tests.evaluator import get_predictions
-from with_tests.feature_transformer import extract_title, extract_gender
+from with_tests.feature_transformer import extract_title, extract_gender, generate_age_estimate
 from with_tests.model_trainer import train_multi_models
 
 
@@ -34,65 +33,47 @@ def run_pipeline():
 
     full_data_df['Title'] = extract_title(full_data_df)
 
-    full_data_df['Sex'] = extract_gender(full_data_df)
+    full_data_df['Gender'] = extract_gender(full_data_df)
 
-    guess_ages = np.zeros((2, 3))
+    full_data_df['AgeGuess'] = generate_age_estimate(full_data_df)
 
-    for i in range(0, 2):
-        for j in range(0, 3):
-            guess_df = full_data_df[(full_data_df['Sex'] == i) & (full_data_df['Pclass'] == j + 1)]['Age'].dropna()
+    full_data_df['AgeBand'] = pd.cut(full_data_df['AgeGuess'], 5)
 
-            # age_mean = guess_df.mean()
-            # age_std = guess_df.std()
-            # age_guess = rnd.uniform(age_mean - age_std, age_mean + age_std)
-
-            age_guess = guess_df.median()
-
-            # Convert random age float to nearest .5 age
-            guess_ages[i, j] = int(age_guess / 0.5 + 0.5) * 0.5
-    for i in range(0, 2):
-        for j in range(0, 3):
-            full_data_df.loc[(full_data_df.Age.isnull()) & (full_data_df.Sex == i) & (full_data_df.Pclass == j + 1), \
-                             'Age'] = guess_ages[i, j]
-    full_data_df['Age'] = full_data_df['Age'].astype(int)
-    full_data_df.head()
-    full_data_df['AgeBand'] = pd.cut(full_data_df['Age'], 5)
-    full_data_df[['AgeBand', 'Survived']].groupby(['AgeBand'], as_index=False).mean().sort_values(by='AgeBand',
-                                                                                                  ascending=True)
-    full_data_df.loc[full_data_df['Age'] <= 16, 'Age'] = 0
-    full_data_df.loc[(full_data_df['Age'] > 16) & (full_data_df['Age'] <= 32), 'Age'] = 1
-    full_data_df.loc[(full_data_df['Age'] > 32) & (full_data_df['Age'] <= 48), 'Age'] = 2
-    full_data_df.loc[(full_data_df['Age'] > 48) & (full_data_df['Age'] <= 64), 'Age'] = 3
-    full_data_df.loc[full_data_df['Age'] > 64, 'Age'] = 4
+    full_data_df.loc[full_data_df['AgeGuess'] <= 16, 'AgeGuess'] = 0
+    full_data_df.loc[(full_data_df['AgeGuess'] > 16) & (full_data_df['AgeGuess'] <= 32), 'AgeGuess'] = 1
+    full_data_df.loc[(full_data_df['AgeGuess'] > 32) & (full_data_df['AgeGuess'] <= 48), 'AgeGuess'] = 2
+    full_data_df.loc[(full_data_df['AgeGuess'] > 48) & (full_data_df['AgeGuess'] <= 64), 'AgeGuess'] = 3
+    full_data_df.loc[full_data_df['AgeGuess'] > 64, 'AgeGuess'] = 4
 
     full_data_df['FamilySize'] = full_data_df['SibSp'] + full_data_df['Parch'] + 1
-    full_data_df[['FamilySize', 'Survived']].groupby(['FamilySize'], as_index=False).mean().sort_values(by='Survived',
-                                                                                                        ascending=False)
+
     full_data_df['IsAlone'] = 0
     full_data_df.loc[full_data_df['FamilySize'] == 1, 'IsAlone'] = 1
-    full_data_df[['IsAlone', 'Survived']].groupby(['IsAlone'], as_index=False).mean()
 
-    full_data_df['Age*Class'] = full_data_df.Age * full_data_df.Pclass
-    full_data_df.loc[:, ['Age*Class', 'Age', 'Pclass']].head(10)
+    full_data_df['Age*Class'] = full_data_df['AgeGuess'] * full_data_df['Pclass']
+    full_data_df.loc[:, ['Age*Class', 'AgeGuess', 'Pclass']].head(10)
     freq_port = full_data_df.Embarked.dropna().mode()[0]
 
     full_data_df['Embarked'] = full_data_df['Embarked'].fillna(freq_port)
-    full_data_df[['Embarked', 'Survived']].groupby(['Embarked'], as_index=False).mean().sort_values(by='Survived',
-                                                                                                    ascending=False)
     full_data_df['Embarked'] = full_data_df['Embarked'].map({'S': 0, 'C': 1, 'Q': 2}).astype(int)
 
     full_data_df['Fare'] = full_data_df['Fare'].fillna(full_data_df['Fare'].dropna().median())
 
     full_data_df['FareBand'] = pd.qcut(full_data_df['Fare'], 4)
-    full_data_df[['FareBand', 'Survived']].groupby(['FareBand'], as_index=False).mean().sort_values(by='FareBand',
-                                                                                                    ascending=True)
+
     full_data_df.loc[full_data_df['Fare'] <= 7.91, 'Fare'] = 0
     full_data_df.loc[(full_data_df['Fare'] > 7.91) & (full_data_df['Fare'] <= 14.454), 'Fare'] = 1
     full_data_df.loc[(full_data_df['Fare'] > 14.454) & (full_data_df['Fare'] <= 31), 'Fare'] = 2
     full_data_df.loc[full_data_df['Fare'] > 31, 'Fare'] = 3
     full_data_df['Fare'] = full_data_df['Fare'].astype(int)
 
-    full_data_df = full_data_df.drop(['Name', 'Ticket', 'Cabin', 'AgeBand', 'FareBand'], axis=1)
+    full_data_df = full_data_df.drop(['Name',
+                                      'Sex',
+                                      'Age',
+                                      'Ticket',
+                                      'Cabin',
+                                      'AgeBand',
+                                      'FareBand'], axis=1)
 
     train_df = full_data_df[-full_data_df['Survived'].isna()]
     train_df = train_df.drop(['PassengerId'], axis=1)
