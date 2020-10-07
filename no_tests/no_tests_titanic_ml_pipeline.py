@@ -20,7 +20,7 @@ from sklearn import metrics
 project_directory = os.environ.get("PROJECT_DIR", '..')
 datasets_folder = f"{project_directory}/datasets/titanic/"
 train_df = pd.read_csv(datasets_folder + "0_train_data.csv")
-test_df = pd.read_csv(datasets_folder + "1_known_data_to_score.csv")
+test_df = pd.read_csv(datasets_folder + os.environ.get("NEW_DATA", "1_known_data_to_score.csv"))
 
 df = pd.concat([train_df, test_df])
 
