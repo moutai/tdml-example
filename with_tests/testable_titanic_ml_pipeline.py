@@ -12,7 +12,7 @@ from sklearn.tree import DecisionTreeClassifier
 from with_tests.evaluator import get_predictions
 from with_tests.feature_transformer import extract_title, extract_gender, generate_age_estimate, \
     convert_age_guess_to_age_category, extract_family_size, extract_is_alone_indicator, calculate_age_class_combo, \
-    extract_embarked_port_category
+    extract_embarked_port_category, extract_fare_category
 from with_tests.model_trainer import train_multi_models
 
 
@@ -49,17 +49,11 @@ def run_pipeline():
 
     full_data_df['EmbarkedPortCategory'] = extract_embarked_port_category(full_data_df)
 
-    full_data_df['Fare'] = full_data_df['Fare'].fillna(full_data_df['Fare'].dropna().median())
+    full_data_df['FareCategory'] = extract_fare_category(full_data_df)
 
-    full_data_df['FareBand'] = pd.qcut(full_data_df['Fare'], 4)
-
-    full_data_df.loc[full_data_df['Fare'] <= 7.91, 'Fare'] = 0
-    full_data_df.loc[(full_data_df['Fare'] > 7.91) & (full_data_df['Fare'] <= 14.454), 'Fare'] = 1
-    full_data_df.loc[(full_data_df['Fare'] > 14.454) & (full_data_df['Fare'] <= 31), 'Fare'] = 2
-    full_data_df.loc[full_data_df['Fare'] > 31, 'Fare'] = 3
-    full_data_df['Fare'] = full_data_df['Fare'].astype(int)
 
     train_df = full_data_df[-full_data_df['Survived'].isna()]
+
     train_df = train_df[[
         'Survived',
         'Title',
@@ -71,9 +65,9 @@ def run_pipeline():
         # 'FamilySize'
         'Age*Class',
         'EmbarkedPortCategory',
-        'Fare',
-        # 'FareBand'
+        'FareCategory',
     ]]
+
     train_columns = train_df.columns
 
     X_train = train_df.drop('Survived', axis=1).copy()
@@ -103,5 +97,5 @@ def run_pipeline():
 
 
 if __name__ == "__main__":
-    outputs, scores = run_pipeline()
+    outputs, scores, _, _ = run_pipeline()
     # outputs.to_csv('scored_known_passengers_titanic.csv', index=False)
