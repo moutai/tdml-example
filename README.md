@@ -26,12 +26,10 @@
 
 4) Once you give up on the no_tests challenge because of all the inter-dependencies in the code and the lack of tests, try to do the same on the `testable_titanic_ml_pipeline.py` code.
 
-5) Send your solutions in a pull request if you wish.        
-    
+5) Send your solution in a pull request if you wish.  
 
 
- 
 
- 
-Evaluate which version of the ML pipeline is easier to edit.
+Companion exercise to the "Clean Machine Learning Code" book: http://cleanmachinelearningcode.com/       
+
 
