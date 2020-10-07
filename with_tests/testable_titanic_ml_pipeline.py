@@ -59,22 +59,30 @@ def run_pipeline():
     full_data_df.loc[full_data_df['Fare'] > 31, 'Fare'] = 3
     full_data_df['Fare'] = full_data_df['Fare'].astype(int)
 
-    full_data_df = full_data_df.drop(['Name',
-                                      'Sex',
-                                      'Age',
-                                      'Ticket',
-                                      'Cabin',
-                                      'FareBand',
-                                      'Embarked'],
-                                     axis=1)
-
     train_df = full_data_df[-full_data_df['Survived'].isna()]
-    train_df = train_df.drop(['PassengerId'], axis=1)
-    X_train = train_df.drop("Survived", axis=1)
+    train_df = train_df[[
+        'Survived',
+        'Title',
+        'Pclass',
+        'Gender',
+        'AgeGuess',
+        # 'AgeCategory',
+        'IsAlone',
+        # 'FamilySize'
+        'Age*Class',
+        'EmbarkedPortCategory',
+        'Fare',
+        # 'FareBand'
+    ]]
+    train_columns = train_df.columns
+
+    X_train = train_df.drop('Survived', axis=1).copy()
     Y_train = train_df["Survived"]
 
     test_df = full_data_df[full_data_df['Survived'].isna()]
+    test_df = test_df[list(train_df.columns.values)+["PassengerId"]]
     test_df = test_df.drop('Survived', axis=1)
+    test_columns = test_df.columns
     X_test = test_df.drop("PassengerId", axis=1).copy()
 
     models_list = [(SVC, 'Support Vector Machines', None),
@@ -91,7 +99,7 @@ def run_pipeline():
                                                      X_test,
                                                      test_df['PassengerId'])
 
-    return passenger_survival_predictions, models_scores
+    return passenger_survival_predictions, models_scores, train_columns, test_columns
 
 
 if __name__ == "__main__":
