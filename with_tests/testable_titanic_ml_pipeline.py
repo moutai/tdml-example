@@ -37,11 +37,7 @@ def run_pipeline():
 
     full_data_df['AgeGuess'] = generate_age_estimate(full_data_df)
 
-    full_data_df.loc[full_data_df['AgeGuess'] <= 16, 'AgeGuess'] = 0
-    full_data_df.loc[(full_data_df['AgeGuess'] > 16) & (full_data_df['AgeGuess'] <= 32), 'AgeGuess'] = 1
-    full_data_df.loc[(full_data_df['AgeGuess'] > 32) & (full_data_df['AgeGuess'] <= 48), 'AgeGuess'] = 2
-    full_data_df.loc[(full_data_df['AgeGuess'] > 48) & (full_data_df['AgeGuess'] <= 64), 'AgeGuess'] = 3
-    full_data_df.loc[full_data_df['AgeGuess'] > 64, 'AgeGuess'] = 4
+    full_data_df['AgeCategory'] = convert_age_guess_to_age_category(full_data_df)
 
     full_data_df['FamilySize'] = full_data_df['SibSp'] + full_data_df['Parch'] + 1
 
@@ -96,6 +92,17 @@ def run_pipeline():
                                                      test_df['PassengerId'])
 
     return passenger_survival_predictions, models_scores
+
+
+def convert_age_guess_to_age_category(input_df):
+    df = input_df[['AgeGuess']].copy()
+    df['AgeCategory'] = 0
+    df.loc[df['AgeGuess'] <= 16, 'AgeCategory'] = 0
+    df.loc[(df['AgeGuess'] > 16) & (df['AgeGuess'] <= 32), 'AgeCategory'] = 1
+    df.loc[(df['AgeGuess'] > 32) & (df['AgeGuess'] <= 48), 'AgeCategory'] = 2
+    df.loc[(df['AgeGuess'] > 48) & (df['AgeGuess'] <= 64), 'AgeCategory'] = 3
+    df.loc[df['AgeGuess'] > 64, 'AgeCategory'] = 4
+    return df[['AgeCategory']]
 
 
 if __name__ == "__main__":
