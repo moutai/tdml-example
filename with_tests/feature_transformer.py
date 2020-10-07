@@ -90,7 +90,8 @@ def extract_embarked_port_category(input_df):
 
 
 def extract_fare_category(input_df):
-    df = input_df[['Fare']]
+    df = input_df[['Fare']].copy()
+    df['FareGuess'] = 0
     df['FareGuess'] = df['Fare'].fillna(df['Fare'].dropna().median())
     df['FareCategory'] = 0
     df.loc[df['FareGuess'] <= 7.91, 'FareCategory'] = 0
