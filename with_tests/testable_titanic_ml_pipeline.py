@@ -10,6 +10,9 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
+from with_tests.evaluator import get_model_accuracy, get_predictions
+from with_tests.model_trainer import train_model, train_multi_models
+
 
 def run_pipeline():
     project_directory = os.environ.get("PROJECT_DIR", '..')
@@ -106,63 +109,23 @@ def run_pipeline():
     Y_train = train_df["Survived"]
     X_test = test_df.drop("PassengerId", axis=1).copy()
 
+    models_list = [(SVC, 'Support Vector Machines', None),
+                   (KNeighborsClassifier, 'KNN', {"n_neighbors": 3}),
+                   (GaussianNB, 'Naive Bayes', None),
+                   (Perceptron, 'Perceptron', None),
+                   (SGDClassifier, 'Stochastic Gradient Decent', None),
+                   (DecisionTreeClassifier, 'Decision Tree', None),
+                   (RandomForestClassifier, 'Random Forest', {"n_estimators": 100})]
 
-    svc = SVC()
-    svc.fit(X_train, Y_train)
-    Y_pred = svc.predict(X_test)
-    acc_svc = round(svc.score(X_train, Y_train) * 100, 2)
+    models_scores, trained_models = train_multi_models(X_train, Y_train, models_list)
 
+    passenger_survival_predictions = get_predictions(trained_models['Random Forest'],
+                                                     X_test,
+                                                     test_df['PassengerId'])
 
-    knn = KNeighborsClassifier(n_neighbors=3)
-    knn.fit(X_train, Y_train)
-    Y_pred = knn.predict(X_test)
-    acc_knn = round(knn.score(X_train, Y_train) * 100, 2)
-
-
-    gaussian = GaussianNB()
-    gaussian.fit(X_train, Y_train)
-    Y_pred = gaussian.predict(X_test)
-    acc_gaussian = round(gaussian.score(X_train, Y_train) * 100, 2)
-
-    perceptron = Perceptron()
-    perceptron.fit(X_train, Y_train)
-    Y_pred = perceptron.predict(X_test)
-    acc_perceptron = round(perceptron.score(X_train, Y_train) * 100, 2)
-
-    sgd = SGDClassifier()
-    sgd.fit(X_train, Y_train)
-    Y_pred = sgd.predict(X_test)
-    acc_sgd = round(sgd.score(X_train, Y_train) * 100, 2)
-
-    decision_tree = DecisionTreeClassifier()
-    decision_tree.fit(X_train, Y_train)
-    Y_pred = decision_tree.predict(X_test)
-    acc_decision_tree = round(decision_tree.score(X_train, Y_train) * 100, 2)
-
-    random_forest = RandomForestClassifier(n_estimators=100)
-    random_forest.fit(X_train, Y_train)
-    Y_pred = random_forest.predict(X_test)
-    random_forest.score(X_train, Y_train)
-    acc_random_forest = round(random_forest.score(X_train, Y_train) * 100, 2)
-
-    models = pd.DataFrame({
-        'Model': ['Support Vector Machines', 'KNN',
-                  'Random Forest', 'Naive Bayes', 'Perceptron',
-                  'Stochastic Gradient Decent',
-                  'Decision Tree'],
-        'Score': [acc_svc, acc_knn,
-                  acc_random_forest, acc_gaussian, acc_perceptron,
-                  acc_sgd, acc_decision_tree]})
-    models.sort_values(by='Score', ascending=False)
-
-    output = pd.DataFrame({
-        "PassengerId": test_df["PassengerId"],
-        "Survived": Y_pred
-    })
-    # output.to_csv('scored_known_passengers_titanic.csv', index=False)
-    return output, models
+    return passenger_survival_predictions, models_scores
 
 
 if __name__ == "__main__":
-    run_pipeline()
-
+    passenger_survival_predictions, models_scores = run_pipeline()
+    # passenger_survival_predictions.to_csv('scored_known_passengers_titanic.csv', index=False)
